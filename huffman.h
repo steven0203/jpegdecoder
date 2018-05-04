@@ -4,19 +4,20 @@
 
 
 
-typedef struct
+typedef struct node
 {
-    node *left;
-    node *right;
+    struct node *left;
+    struct node *right;
     unsigned char symbol;
+    unsigned short codeword;
 }node;
 
 
 int isLeaf(node *);
 node *createNode();
-node *createHuffmamTree(DHTdata);
-void *insertHuffmamNode(node *,unsigned short,unsigned char );
+node *createHuffmanTree(DHTdata);
+void *insertHuffmanNode(node *,unsigned short,unsigned char );
 int checkCodeWord(unsigned short,unsigned char);
-
+void removeTree(node *);
 #endif
 

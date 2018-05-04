@@ -2,8 +2,11 @@
 #include<cstdlib>
 #include<vector>
 #include"headProcess.h"
+#include"huffman.h"
+#include<queue>
 using namespace std;
 
+void bfs(node *);
 
 int main()
 {
@@ -56,5 +59,30 @@ int main()
     for(int i=0;i<SOS.comNum;++i)
         printf("%d  %d %d \n",SOS.components[i].id,SOS.components[i].ACid,SOS.components[i].DCid);
 
+    node *root=createHuffmanTree(head.DHTs[3]);
+    bfs(root);
+    removeTree(root);
     return 0;
+}
+
+void bfs(node *root)
+{
+    queue<node *>q;
+    q.push(root);
+    node *tmp;
+    while(!q.empty())
+    {
+        tmp=q.front();
+        q.pop();
+        if(isLeaf(tmp))
+        {
+            printf("%u,%u\n",tmp->codeword,tmp->symbol);
+            continue;
+        }
+        if(tmp->left)
+            q.push(tmp->left);
+
+        if(tmp->right)
+            q.push(tmp->right);
+    }
 }
