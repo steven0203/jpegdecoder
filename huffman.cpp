@@ -21,13 +21,9 @@ node *createNode()
     return result;
 }
 
-int checkCodeWord(unsigned short codeword,unsigned char bit)
+unsigned short checkCodeWord(unsigned short codeword,unsigned char bit)
 {
-    unsigned short check=0b1000000000000000;
-    if(codeword&(check>>bit))
-        return 1;
-    else 
-        return 0;
+    return (codeword>>(15-bit))&1;
 }
 
 
@@ -66,7 +62,7 @@ node *createHuffmanTree(DHTdata DHT)
         number=DHT.symbolsNum[i];
         for(;number>0;--number)
         {
-            insertHuffmanNode(root,codeword<<16-(i+1),i+1,DHT.symbols[index]);
+            insertHuffmanNode(root,codeword<<15-i,i,DHT.symbols[index]);
             codeword=codeword+1;
             index+=1;
         }
@@ -95,7 +91,29 @@ void removeTree(node *root)
 
         if(tmp->right)
             q.push(tmp->right);
-        free(tmp);
+                free(tmp);
 
+    }
+}
+
+void bfs(node *root)
+{
+    queue<node *>q;
+    q.push(root);
+    node *tmp;
+    while(!q.empty())
+    {
+        tmp=q.front();
+        q.pop();
+        if(isLeaf(tmp))
+        {
+            printf("%u,%x\n",tmp->codeword,tmp->symbol);
+            continue;
+        }
+        if(tmp->left)
+            q.push(tmp->left);
+
+        if(tmp->right)
+            q.push(tmp->right);
     }
 }

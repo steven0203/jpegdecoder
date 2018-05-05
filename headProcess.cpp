@@ -11,7 +11,7 @@ unsigned short reverseByte(unsigned short data)
 
 int headSegment:: headProcess(FILE *img)
 {
-        unsigned short data=0;
+    unsigned short data=0;
     fread(&data,2,1,img);
     if(data!=SOI)
         return 1;
@@ -111,5 +111,7 @@ int headSegment:: headProcess(FILE *img)
         component.DCid=tableId&0x0F;
         SOS.components.push_back(component);
     }
+
+    fseek(img,3,SEEK_CUR);
     return 0;
 }

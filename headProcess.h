@@ -25,5 +25,10 @@ class headSegment
         int headProcess(FILE *);
     private:
         
+        
 };
+
+
+
+
 #endif

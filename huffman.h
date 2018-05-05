@@ -17,7 +17,10 @@ int isLeaf(node *);
 node *createNode();
 node *createHuffmanTree(DHTdata);
 void *insertHuffmanNode(node *,unsigned short,unsigned char );
-int checkCodeWord(unsigned short,unsigned char);
+unsigned short checkCodeWord(unsigned short,unsigned char);
 void removeTree(node *);
+void bfs(node *);
+
+
 #endif
 

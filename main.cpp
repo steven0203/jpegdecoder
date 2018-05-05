@@ -4,9 +4,10 @@
 #include"headProcess.h"
 #include"huffman.h"
 #include<queue>
+#include"dataStream.h"
+#include"decoder.h"
 using namespace std;
 
-void bfs(node *);
 
 int main()
 {
@@ -58,31 +59,19 @@ int main()
     printf("SOS length %d number %d \n ",SOS.length,SOS.comNum);
     for(int i=0;i<SOS.comNum;++i)
         printf("%d  %d %d \n",SOS.components[i].id,SOS.components[i].ACid,SOS.components[i].DCid);
+    decoder testdecoder(head,testFile);
+    int block[64]={0};
+    testdecoder.decode();
+    /*printf("%d,%d\n",result->height,result->width);
+    for(int i=0;i<result->height;++i)
+    {
+        for(int j=0;j<result->width;++j)
+            printf("%3d ",result->get(i,j,0));
+        printf("\n");
+    }*/
+   // delete result;    
 
-    node *root=createHuffmanTree(head.DHTs[3]);
-    bfs(root);
-    removeTree(root);
     return 0;
 }
 
-void bfs(node *root)
-{
-    queue<node *>q;
-    q.push(root);
-    node *tmp;
-    while(!q.empty())
-    {
-        tmp=q.front();
-        q.pop();
-        if(isLeaf(tmp))
-        {
-            printf("%u,%u\n",tmp->codeword,tmp->symbol);
-            continue;
-        }
-        if(tmp->left)
-            q.push(tmp->left);
 
-        if(tmp->right)
-            q.push(tmp->right);
-    }
-}
