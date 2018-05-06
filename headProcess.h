@@ -24,8 +24,9 @@ class headSegment
         SOSdata SOS;
         int headProcess(FILE *);
     private:
-        
-        
+        unsigned char APPprocess(unsigned short ,FILE *);
+        unsigned char DQTprocess(FILE*);
+        unsigned char SOF0process(FILE *);
 };
 
 

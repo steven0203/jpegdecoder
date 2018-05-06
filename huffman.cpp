@@ -46,6 +46,7 @@ void *insertHuffmanNode(node *root,unsigned short codeword,unsigned char depth,u
             curNode=curNode->left;
         }
     }
+    curNode->depth=depth;
     curNode->symbol=symbol;
     curNode->codeword=codeword;
 }
@@ -107,7 +108,7 @@ void bfs(node *root)
         q.pop();
         if(isLeaf(tmp))
         {
-            printf("%u,%x\n",tmp->codeword,tmp->symbol);
+            printf("%u %u,%x \n",tmp->depth,tmp->codeword,tmp->symbol);
             continue;
         }
         if(tmp->left)

@@ -10,6 +10,7 @@ typedef struct node
     struct node *right;
     unsigned char symbol;
     unsigned short codeword;
+    unsigned char depth;
 }node;
 
 

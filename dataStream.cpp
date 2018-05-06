@@ -43,15 +43,19 @@ unsigned short dataStream::checkBlock()
     unsigned char tmp;
     if(currentData!=0xFF)
         return 0;
-    tmp=fread(&tmp,1,1,path);
+    fread(&tmp,1,1,path);
+    
     if(tmp==0xD9)
     {
         end=true;
         return EOI_MARKING;
     }
-    if(tmp==0)
+    if(tmp==0x00)
+    {
         return 0;
+    }
     currentData=tmp;
+    
 }
 
 bool dataStream::isEnd()

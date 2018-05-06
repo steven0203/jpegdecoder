@@ -6,6 +6,7 @@
 #include<queue>
 #include"dataStream.h"
 #include"decoder.h"
+#include"bitmap_image.hpp"
 using namespace std;
 
 
@@ -13,7 +14,7 @@ int main()
 {
     FILE * testFile;
     headSegment head;
-    testFile=fopen("./img/monalisa.jpg","rb");
+    testFile=fopen("./img/gig-sn08.jpg","rb");
     if (testFile==NULL)
     {
         fputs ("File error",stderr); 
@@ -60,18 +61,34 @@ int main()
     for(int i=0;i<SOS.comNum;++i)
         printf("%d  %d %d \n",SOS.components[i].id,SOS.components[i].ACid,SOS.components[i].DCid);
     decoder testdecoder(head,testFile);
-    int block[64]={0};
-    testdecoder.decode();
-    /*printf("%d,%d\n",result->height,result->width);
-    for(int i=0;i<result->height;++i)
-    {
-        for(int j=0;j<result->width;++j)
-            printf("%3d ",result->get(i,j,0));
-        printf("\n");
-    }*/
-   // delete result;    
+    imgData result(testdecoder.height,testdecoder.width,testdecoder.colorComs.size());
+    testdecoder.decode(result);
 
+    printf("%d,%d\n",result.height,result.width);
+    for(int i=0;i<16;++i)
+    {
+        for(int j=0;j<16;++j)
+        {
+            printf("%3d ",result.get(i,j,0));
+        }
+        printf("\n");
+    }
+    unsigned char r,g,b;
+    bitmap_image resultImg(testdecoder.width,testdecoder.height);
+    for(int i=0;i<testdecoder.height;++i)
+    {
+        for(int j=0;j<testdecoder.width;++j)
+        {
+            r=result.get(i,j,0);
+            g=result.get(i,j,1);
+            b=result.get(i,j,2);
+            resultImg.set_pixel(j,i,r,g,b);
+        }
+    }
+    resultImg.save_image("test5.bmp");
+    
     return 0;
+
 }
 
 

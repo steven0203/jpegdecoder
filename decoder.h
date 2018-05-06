@@ -20,7 +20,7 @@ class imgData
         unsigned char get(int,int,int);
         void set(int,int,int,unsigned char);
     private:
-        unsigned char *data;
+        vector<unsigned char*> data;
 };
 
 
@@ -31,14 +31,14 @@ class decoder
         int decodeBlock(int, int []);
         int height;
         int width;
-        void decode();
-
+        void decode(imgData &);
+        vector<colorCom>colorComs;
+        vector<node *>DCtree;
+        vector<node *>ACtree;
     private:
         vector<int>DCpredict;
         vector<DQTdata>DQTs;
-        vector<node *>DCtree;
-        vector<node *>ACtree;
-        vector<colorCom>colorComs;
+
         vector<scanCom>scanComs;
         dataStream data;
         void zingZang(int *);
@@ -46,11 +46,11 @@ class decoder
         void deQuantize(int ,int []);
         void IDCT(int []);
         void levelShift(int []);
-        void initializeBlock(int []);
         void getMCU(imgData &);
 };
 
-imgData *YCbCrtoRGB(imgData &);
+void YCbCrtoRGB(imgData &,imgData &);
+void initializeBlock(int []);
 
 
 

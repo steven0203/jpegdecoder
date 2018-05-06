@@ -4,7 +4,12 @@
 
 decoder::decoder(headSegment &head,FILE *path):data(path)
 {
-    DQTs=head.DQTs;
+    DQTs=vector<DQTdata>(head.DQTs.size());
+    for(int i=0;i<DQTs.size();++i)
+    {
+        int index=head.DQTs[i].number;
+        DQTs[index]=head.DQTs[i];
+    }
     DCtree=vector<node *>(16);
     ACtree=vector<node *>(16);
     for(int i=0;i<head.DHTs.size();++i)
@@ -58,6 +63,7 @@ int decoder::decodeBlock(int colorId,int block[64])
                 tmpNode=tmpNode->left;
             if(isLeaf(tmpNode))
             {
+               // printf("test %d,%d %X %d\n",tmpNode->codeword,tmpNode->symbol,data.currentData,data.currentBit);
                 break;
             }
         }
@@ -67,7 +73,9 @@ int decoder::decodeBlock(int colorId,int block[64])
         {
             break;
         }
+       // printf("test3 %X %d\n",tmpNode->symbol,(tmpNode->symbol)&0x0F);
         code=data.getBits((tmpNode->symbol)&0x0F);
+//printf("test2 %X,%d\n" ,data.currentData,data.currentBit);
         result=codeToValue(code,(tmpNode->symbol)&0x0F);
         block[i]=result;
     }
@@ -139,7 +147,7 @@ void decoder::levelShift(int block[64])
         block[i]+=128;
 }
 
-void decoder::decode()
+void decoder::decode(imgData &result)
 {
     int MCUheight,MCUwidth;
     int maxV=0,maxH=0;
@@ -158,20 +166,20 @@ void decoder::decode()
     imgData MCU(MCUheight,MCUwidth,colorComs.size());
     unsigned char tmp;
     int imageH,imageV;
-    for(int i=0;i<verticalNum&&!data.isEnd();++i)
+    for(int i=0;i<verticalNum;++i)
     {
-        for(int j=0;j<horizontalNum&&!data.isEnd();++j)
+        for(int j=0;j<horizontalNum;++j)
         {   
             getMCU(MCU);
             for(int h=0;h<MCU.height;++h)
             {
                 imageV=i*MCUheight+h;
-                if(imageV>image.height)
+                if(imageV>=image.height)
                     break;
                 for(int k=0;k<MCU.width;++k)
                 {
                     imageH=j*MCUwidth+k;
-                    if(imageH>image.width)
+                    if(imageH>=image.width)
                         break;
                     for(int index=0;index<colorComs.size();++index)
                     {
@@ -180,10 +188,10 @@ void decoder::decode()
                     }
                 }
             }
-            printf("%d,%d,%d,%d\n",i,j,verticalNum,horizontalNum);
         }
-        
     }
+
+    YCbCrtoRGB(image,result);
     return ;
 }
 imgData::imgData(int h,int w,int n)
@@ -191,35 +199,39 @@ imgData::imgData(int h,int w,int n)
     height=h;
     width=w;
     colorNum=n;
-    data=(unsigned char *)malloc(h*w*n*(sizeof(unsigned char)));
-    
+    data=vector<unsigned char*>(colorNum);
+    for(int i=0;i<colorNum;++i)
+    {
+        data[i]=(unsigned char *)malloc(h*w*(sizeof(unsigned char)));
+    }
 }
 
 imgData::~imgData()
 {
-    free(data);
+    for(int i=0;i<colorNum;++i)
+    {
+        free(data[i]);
+    }
 }
 
 unsigned char imgData::get(int h,int w,int n)
 {
-    return data[height*width*n+h*width+w];
+    return data[n][h*width+w];
 }
 
 void imgData::set(int h,int w,int n,unsigned char input)
 {
-   data[height*width*n+h*width+w]=input;
+   data[n][h*width+w]=input;
 }
 
-void decoder::initializeBlock(int block[64])
+void initializeBlock(int block[64])
 {
     for(int i=0;i<64;++i)
         block[i]=0;
 }
-
-imgData *YCbCrtoRGB(imgData &input)
+void YCbCrtoRGB(imgData &input,imgData &result)
 {
     double r,g,b,y,Cb,Cr;
-    imgData *result=new imgData(input.height,input.width,3);
     for(int i=0;i<input.height;++i)
         for(int j=0;j<input.width;++j)
         {
@@ -235,12 +247,11 @@ imgData *YCbCrtoRGB(imgData &input)
             r=r<0?0:r;
             g=g<0?0:g;
             b=b<0?0:b;
-            result->set(i,j,0,(unsigned char)r);
-            result->set(i,j,1,(unsigned char)g);
-            result->set(i,j,2,(unsigned char)b);
+            result.set(i,j,0,(unsigned char)r);
+            result.set(i,j,1,(unsigned char)g);
+            result.set(i,j,2,(unsigned char)b);
 
         }
-    return result;
 }
 
 void decoder::getMCU(imgData &MCU)
