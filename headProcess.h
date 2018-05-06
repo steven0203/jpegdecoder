@@ -27,6 +27,9 @@ class headSegment
         unsigned char APPprocess(unsigned short ,FILE *);
         unsigned char DQTprocess(FILE*);
         unsigned char SOF0process(FILE *);
+        unsigned char DHTprocess(FILE *);
+        unsigned char SOSprocess(FILE*);
+        unsigned char COMprocess(FILE*);
 };
 
 

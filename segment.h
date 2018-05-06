@@ -11,7 +11,7 @@ static const unsigned short DQT_MARKER = 0xDBFF;
 static const unsigned short SOF0_MARKER= 0xC0FF;
 static const unsigned short DHT_MARKER=0xC4FF;
 static const unsigned short SOS_MARKER=0xDAFF;
-
+static const unsigned short COM_MARKER=0xFEFF;
 #define AC_TABLE 1
 #define DC_TABLE 0
 

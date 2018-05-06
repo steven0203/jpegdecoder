@@ -9,12 +9,13 @@
 #include"bitmap_image.hpp"
 using namespace std;
 
+void printHeader(headSegment);
 
 int main()
 {
     FILE * testFile;
     headSegment head;
-    testFile=fopen("./img/gig-sn08.jpg","rb");
+    testFile=fopen("./img/teatime.jpg","rb");
     if (testFile==NULL)
     {
         fputs ("File error",stderr); 
@@ -23,6 +24,32 @@ int main()
 
 
     head.headProcess(testFile);
+    printHeader(head);
+   
+    decoder testdecoder(head,testFile);
+    imgData result(testdecoder.height,testdecoder.width,testdecoder.colorComs.size());
+    testdecoder.decode(result);
+
+    unsigned char r,g,b;
+    bitmap_image resultImg(testdecoder.width,testdecoder.height);
+    for(int i=0;i<testdecoder.height;++i)
+    {
+        for(int j=0;j<testdecoder.width;++j)
+        {
+            r=result.get(i,j,0);
+            g=result.get(i,j,1);
+            b=result.get(i,j,2);
+            resultImg.set_pixel(j,i,r,g,b);
+        }
+    }
+    resultImg.save_image("test5.bmp");
+    
+    return 0;
+
+}
+
+void printHeader(headSegment head)
+{
     vector<APPdata> APP=head.APP;
     for(int i=0;i<APP.size();++i)
     {
@@ -52,7 +79,7 @@ int main()
         for(int j=0;j<16;++j)
             printf("%d ",DHTs[i].symbolsNum[j]);
         printf("\nsymbols :");
-        for(int j=0;j<DHTs[i].length-19;++j)
+        for(int j=0;j<DHTs[i].length-16;++j)
             printf("%d ",DHTs[i].symbols[j]);
         printf("\n");        
     }
@@ -60,35 +87,6 @@ int main()
     printf("SOS length %d number %d \n ",SOS.length,SOS.comNum);
     for(int i=0;i<SOS.comNum;++i)
         printf("%d  %d %d \n",SOS.components[i].id,SOS.components[i].ACid,SOS.components[i].DCid);
-    decoder testdecoder(head,testFile);
-    imgData result(testdecoder.height,testdecoder.width,testdecoder.colorComs.size());
-    testdecoder.decode(result);
-
-    printf("%d,%d\n",result.height,result.width);
-    for(int i=0;i<16;++i)
-    {
-        for(int j=0;j<16;++j)
-        {
-            printf("%3d ",result.get(i,j,0));
-        }
-        printf("\n");
-    }
-    unsigned char r,g,b;
-    bitmap_image resultImg(testdecoder.width,testdecoder.height);
-    for(int i=0;i<testdecoder.height;++i)
-    {
-        for(int j=0;j<testdecoder.width;++j)
-        {
-            r=result.get(i,j,0);
-            g=result.get(i,j,1);
-            b=result.get(i,j,2);
-            resultImg.set_pixel(j,i,r,g,b);
-        }
-    }
-    resultImg.save_image("test5.bmp");
-    
-    return 0;
 
 }
-
 

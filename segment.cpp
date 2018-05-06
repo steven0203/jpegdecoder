@@ -44,13 +44,15 @@ SOF0data::SOF0data(unsigned short length,unsigned char precision,unsigned short 
 }
 
 void SOF0data::setColorComs(unsigned char *data)
-{
+{   
+    int id;
     for(int i=0;i<colorComNum;++i)
-    {
-        colorComs[i].id=data[i*3];
-        colorComs[i].verticalFactor=data[i*3+1]>>4;
-        colorComs[i].horizontalFactor=data[i*3+1]&0x0F;
-        colorComs[i].QtId=data[i*3+2];
+    {   
+        id=data[i*3]-1;
+        colorComs[id].id=data[i*3];
+        colorComs[id].verticalFactor=data[i*3+1]&0x0F;
+        colorComs[id].horizontalFactor=data[i*3+1]>>4;
+        colorComs[id].QtId=data[i*3+2];
     }
 }
 
