@@ -47,9 +47,9 @@ class decoder
         void deQuantize(int ,int []);
         void IDCT(int []);
         void levelShift(int []);
-        void getMCU(imgData &);
         double cosData[8][8];
         void initializeCos();
+        void getMCU(imgData &,int,int,int,int);
 };
 
 void YCbCrtoRGB(imgData &,imgData &);

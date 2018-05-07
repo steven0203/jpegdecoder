@@ -143,7 +143,6 @@ void decoder::IDCT(int block[64])
                     if(q==0) coefficient2=0.353553391;
                     else coefficient2=0.5;
                     tmp+=coefficient1*coefficient2*originBlock[p*N+q]*cosData[i][p]*cosData[j][q];
-                    //tmp+=coefficient1*coefficient2*originBlock[p*N+q]*cos((2*i+1)*PI*p/(2*N))*cos((2*j+1)*PI*q/(2*N));
                 }
             block[i*N+j]=(int)tmp;
         } 
@@ -179,31 +178,14 @@ void decoder::decode(imgData &result)
     int horizontalNum=width/MCUwidth+(width%MCUwidth?1:0);
     int verticalNum=height/MCUheight+(height%MCUheight?1:0);
     imgData image(height,width,colorComs.size());
-    imgData MCU(MCUheight,MCUwidth,colorComs.size());
+    //imgData MCU(MCUheight,MCUwidth,colorComs.size());
     unsigned char tmp;
     int imageH,imageV;
     for(int i=0;i<verticalNum;++i)
     {
         for(int j=0;j<horizontalNum;++j)
         {   
-            getMCU(MCU);
-            for(int h=0;h<MCU.height;++h)
-            {
-                imageV=i*MCUheight+h;
-                if(imageV>=image.height)
-                    break;
-                for(int k=0;k<MCU.width;++k)
-                {
-                    imageH=j*MCUwidth+k;
-                    if(imageH>=image.width)
-                        break;
-                    for(int index=0;index<colorComs.size();++index)
-                    {
-                        tmp=MCU.get(h,k,index);
-                        image.set(imageV,imageH,index,tmp);
-                    }
-                }
-            }
+            getMCU(image,i*MCUheight,j*MCUwidth,maxV,maxH);
         }
     }
 
@@ -271,40 +253,6 @@ void YCbCrtoRGB(imgData &input,imgData &result)
         }
 }
 
-void decoder::getMCU(imgData &MCU)
-{   
-    int block[64]={0},blockH=0,blockV=0;
-    int maxH=MCU.width/8;
-    int maxV=MCU.height/8;
-    for(int colorId=0;colorId<colorComs.size();++colorId)
-    {    
-        for(int i=0;i<colorComs[colorId].verticalFactor;++i)
-        {
-            for(int j=0;j<colorComs[colorId].horizontalFactor;++j)
-            {
-                initializeBlock(block);
-                decodeBlock(colorId,block);
-                for(int h=0;h<MCU.height/colorComs[colorId].verticalFactor;++h)
-                {
-                    for(int k=0;k<MCU.width/colorComs[colorId].horizontalFactor;++k)
-                    {
-                        maxH=MCU.width/8;
-                        maxV=MCU.height/8;
-
-                        blockV=h/(maxV/(int)colorComs[colorId].verticalFactor);
-                        blockH=k/(maxH/(int)colorComs[colorId].horizontalFactor);
-
-                        MCU.set(i*8+h,j*8+k,colorId,(unsigned char)block[blockV*8+blockH]);
-                    }
-
-                }
-                
-            }
-        }
-      
-    }
-}
-
 void decoder::initializeCos()
 {
     int N=8;
@@ -333,3 +281,34 @@ imgData::imgData()
 
 }
 
+void decoder::getMCU(imgData &resultImg,int currentV,int currentH,int maxV,int maxH)
+{
+    int block[64]={0},blockH=0,blockV=0;
+    int imgV,imgH;
+    for(int colorId=0;colorId<colorComs.size();++colorId)
+    {    
+        for(int i=0;i<colorComs[colorId].verticalFactor;++i)
+        {
+            for(int j=0;j<colorComs[colorId].horizontalFactor;++j)
+            {
+                initializeBlock(block);
+                decodeBlock(colorId,block);
+                for(int h=0;h<maxV*8/colorComs[colorId].verticalFactor;++h)
+                {
+                    imgV=i*8+h+currentV;
+                    if(imgV>=height)
+                        break;
+                    for(int k=0;k<maxH*8/colorComs[colorId].horizontalFactor;++k)
+                    {
+                        blockV=h/(maxV/(int)colorComs[colorId].verticalFactor);
+                        blockH=k/(maxH/(int)colorComs[colorId].horizontalFactor);
+                        imgH=j*8+k+currentH;
+                        if(imgH>=width)
+                            break;
+                        resultImg.set(imgV,imgH,colorId,(unsigned char)block[blockV*8+blockH]);
+                    }
+                }
+            }
+        }
+    }
+}
