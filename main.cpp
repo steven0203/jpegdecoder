@@ -26,7 +26,7 @@ int main(int argc,char**argv)
     }
     imgData *result;
     result=decodeJPEG(inputPath);
-   /* unsigned char r,g,b;
+    unsigned char r,g,b;
     bitmap_image resultImg(result->width,result->height);
     for(int i=0;i<result->height;++i)
     {
@@ -46,7 +46,7 @@ int main(int argc,char**argv)
     resultImg.save_image("output.bmp");
 
     delete result;
-   */
+   
     return 0;
 
 }
