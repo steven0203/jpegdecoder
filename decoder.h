@@ -15,6 +15,7 @@ class imgData
         int height;
         int width;
         int colorNum;
+        imgData();
         imgData(int,int,int);
         ~imgData();
         unsigned char get(int,int,int);
@@ -47,10 +48,14 @@ class decoder
         void IDCT(int []);
         void levelShift(int []);
         void getMCU(imgData &);
+        double cosData[8][8];
+        void initializeCos();
 };
 
 void YCbCrtoRGB(imgData &,imgData &);
 void initializeBlock(int []);
+
+imgData* decodeJPEG(FILE*);
 
 
 

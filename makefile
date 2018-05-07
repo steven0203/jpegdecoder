@@ -1,0 +1,2 @@
+jpegdecoder:main.cpp dataStream.cpp dataStream.h decoder.cpp decoder.h headProcess.h headProcess.cpp segment.h segment.cpp huffman.cpp huffman.h bitmap_image.hpp
+	g++ -o jpegdecoder main.cpp dataStream.cpp decoder.cpp  headProcess.cpp segment.cpp huffman.cpp 

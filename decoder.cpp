@@ -1,6 +1,10 @@
 #include"decoder.h"
+#include"huffman.h"
+#include"dataStream.h"
+#include"headProcess.h"
 #include<cmath>
 #define PI 3.14159262
+
 
 decoder::decoder(headSegment &head,FILE *path):data(path)
 {
@@ -26,6 +30,7 @@ decoder::decoder(headSegment &head,FILE *path):data(path)
     scanComs=head.SOS.components;
     height=head.SOF0.height;
     width=head.SOF0.width;
+    initializeCos();
 }
 
 int decoder::decodeBlock(int colorId,int block[64])
@@ -73,16 +78,21 @@ int decoder::decodeBlock(int colorId,int block[64])
         {
             break;
         }
-       // printf("test3 %X %d\n",tmpNode->symbol,(tmpNode->symbol)&0x0F);
         code=data.getBits((tmpNode->symbol)&0x0F);
-//printf("test2 %X,%d\n" ,data.currentData,data.currentBit);
         result=codeToValue(code,(tmpNode->symbol)&0x0F);
         block[i]=result;
     }
+   // printf("\n");
+
+   
+
+
     deQuantize(QTid,block);
     zingZang(block);
     IDCT(block);
     levelShift(block);
+  
+   
     return 0;
 }
 
@@ -128,14 +138,14 @@ void decoder::IDCT(int block[64])
             for(int p=0;p<N;p++)
                 for(int q=0;q<N;q++)
                 {
-                    
-                    if(p==0) coefficient1=sqrt(1.0/N);
-                    else coefficient1=sqrt(2.0/N);
-                    if(q==0) coefficient2=sqrt(1.0/N);
-                    else coefficient2=sqrt(2.0/N);
-                    tmp+=coefficient1*coefficient2*originBlock[p*N+q]*cos((2*i+1)*PI*p/(2*N))*cos((2*j+1)*PI*q/(2*N));
+                    if(p==0) coefficient1=0.353553391;
+                    else coefficient1=0.5;
+                    if(q==0) coefficient2=0.353553391;
+                    else coefficient2=0.5;
+                    tmp+=coefficient1*coefficient2*originBlock[p*N+q]*cosData[i][p]*cosData[j][q];
+                    //tmp+=coefficient1*coefficient2*originBlock[p*N+q]*cos((2*i+1)*PI*p/(2*N))*cos((2*j+1)*PI*q/(2*N));
                 }
-            block[i*N+j]=short(round(tmp));
+            block[i*N+j]=(int)tmp;
         } 
     }
 
@@ -144,7 +154,13 @@ void decoder::IDCT(int block[64])
 void decoder::levelShift(int block[64])
 {
     for(int i=0;i<64;++i)
+    {
         block[i]+=128;
+        if(block[i]<0)
+            block[i]=0;
+        if(block[i]>255)
+            block[i]=255;
+    }
 }
 
 void decoder::decode(imgData &result)
@@ -247,6 +263,7 @@ void YCbCrtoRGB(imgData &input,imgData &result)
             r=r<0?0:r;
             g=g<0?0:g;
             b=b<0?0:b;
+
             result.set(i,j,0,(unsigned char)r);
             result.set(i,j,1,(unsigned char)g);
             result.set(i,j,2,(unsigned char)b);
@@ -267,7 +284,6 @@ void decoder::getMCU(imgData &MCU)
             {
                 initializeBlock(block);
                 decodeBlock(colorId,block);
-
                 for(int h=0;h<MCU.height/colorComs[colorId].verticalFactor;++h)
                 {
                     for(int k=0;k<MCU.width/colorComs[colorId].horizontalFactor;++k)
@@ -282,8 +298,38 @@ void decoder::getMCU(imgData &MCU)
                     }
 
                 }
-
+                
             }
+        }
+      
+    }
+}
+
+void decoder::initializeCos()
+{
+    int N=8;
+    for(int i=0;i<8;++i)
+    {
+        for(int j=0;j<8;++j)
+        {
+            cosData[i][j]=cos((2*i+1)*PI*j/(2*N));
         }
     }
 }
+
+
+imgData * decodeJPEG(FILE *path)
+{   
+    headSegment head;
+    head.headProcess(path);
+    decoder imgDecoder(head,path);
+    imgData *result=new  imgData(imgDecoder.height,imgDecoder.width,3);
+    imgDecoder.decode(*result);
+    return result;
+}
+
+imgData::imgData()
+{
+
+}
+

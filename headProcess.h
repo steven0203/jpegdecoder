@@ -32,6 +32,7 @@ class headSegment
         unsigned char COMprocess(FILE*);
 };
 
+void printHeader(headSegment);
 
 
 

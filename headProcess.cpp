@@ -1,6 +1,8 @@
 #include<vector>
 #include<cstdlib>
 #include"headProcess.h"
+#include"segment.h"
+
 using namespace std;
 
 
@@ -22,6 +24,21 @@ int headSegment:: headProcess(FILE *img)
         switch(marker)
         {
             case(APP0):
+            case(APP1):
+            case(APP2):
+            case(APP3):
+            case(APP4):
+            case(APP5):
+            case(APP6):
+            case(APP7):
+            case(APP8):
+            case(APP9):
+            case(APP10):
+            case(APP11):
+            case(APP12):
+            case(APP13):
+            case(APP14):
+            case(APP15):
                 APPprocess(marker,img);
                 break;
             case(DQT_MARKER):
@@ -56,7 +73,7 @@ unsigned char headSegment::APPprocess(unsigned short marker,FILE *img)
     APPdata APPn;  
     APPn.n=(marker>>8)&0x000F;
     fread(&data,2,1,img);
-    APPn.Lp=(data>>8);
+    APPn.Lp=reverseByte(data);
     APP.push_back(APPn);
     fseek(img,APPn.Lp-2,SEEK_CUR);
     return 0;
@@ -178,3 +195,47 @@ unsigned char headSegment::COMprocess(FILE*img)
     length=reverseByte(length);
     fseek(img,length-2,SEEK_CUR);
 }
+
+void printHeader(headSegment head)
+{
+    vector<APPdata> APP=head.APP;
+    for(int i=0;i<APP.size();++i)
+    {
+        printf("APP%d LP : %d\n",APP[i].n,APP[i].Lp);
+    }
+    vector<DQTdata> DQTs=head.DQTs;
+    for(int i=0;i<DQTs.size();++i)
+    {
+        printf("DQT length :%d number : %d precision : %d \n",DQTs[i].length,DQTs[i].number,DQTs[i].precision);
+        for(int j=0;j<64;++j)
+        {
+            printf("%d ",DQTs[i].getQT(j));
+        }
+        printf("\n");
+    }
+    SOF0data SOF0=head.SOF0;
+    printf("SOF0 length : %d precision : %d height : %d width : %d Nf :%d \n" ,SOF0.length,SOF0.precision,SOF0.height,SOF0.width,SOF0.colorComNum);
+    for(int i=0;i<SOF0.colorComNum;++i)
+    {
+        printf("C %d H %d V %d Tq %d\n", SOF0.colorComs[i].id,SOF0.colorComs[i].horizontalFactor,SOF0.colorComs[i].verticalFactor,SOF0.colorComs[i].QtId);
+    }
+    vector<DHTdata>DHTs=head.DHTs;
+    for(int i=0;i<DHTs.size();++i)
+    {
+        printf("DHT number: %d length : %d  type : %d \n",DHTs[i].number,DHTs[i].length, DHTs[i].type);
+        printf("numbers :");
+        for(int j=0;j<16;++j)
+            printf("%d ",DHTs[i].symbolsNum[j]);
+        printf("\nsymbols :");
+        for(int j=0;j<DHTs[i].length-16;++j)
+            printf("%d ",DHTs[i].symbols[j]);
+        printf("\n");        
+    }
+    SOSdata SOS=head.SOS;
+    printf("SOS length %d number %d \n ",SOS.length,SOS.comNum);
+    for(int i=0;i<SOS.comNum;++i)
+        printf("%d  %d %d \n",SOS.components[i].id,SOS.components[i].ACid,SOS.components[i].DCid);
+
+}
+
+
